@@ -201,10 +201,62 @@ Planning Loop
 
 **Milestone 3 — Individual tool implementations:**
 
-I will use ChatGPT to generate implementations for each individual tool. I will provide the tool specifications sections from the planning.md and the dataset structure from listings.json and wardrobe_schema.json. I expect the AI to generate working good py functions that match the specified inputs, outputs, and failure behavior. Before using the code, I will verify that each function follows the specification and make sure to test it with multiple inputs.
+I used ChatGPT to help implement and debug each tool in tools.py.
+
+For search_listings, I provided:
+
+- the tool specification from planning.md (inputs, return format, and failure behavior)
+- the structure of listings.json
+
+I asked ChatGPT to generate a filtering and ranking function using keyword overlap, price filtering, and size matching.
+
+The initial output did not properly handle partial size matches (e.g. "S/M"), so I manually adjusted the size filtering logic and improved case-insensitive matching.
+
+Before finalizing, I tested the function using multiple queries and verified:
+
+- it returns a list of dictionaries
+- it returns an empty list when no matches exist
+- results are sorted by relevance score
+
+For suggest_outfit and create_fit_card, I used ChatGPT to refine prompt engineering.
+
+I provided:
+
+- tool specifications from planning.md
+- examples of desired output style (casual, aesthetic, social-media tone)
+
+ChatGPT initially produced outputs that were too “marketing-like” and formal. I revised the prompts to:
+
+- enforce casual, conversational tone
+- explicitly prohibit marketing language
+- encourage variability in output using temperature adjustment
+
+I tested multiple runs of the same input to confirm:
+
+- outputs vary between runs
+- outfit suggestions remain contextually consistent
+- fit cards follow the required 2–4 sentence style
 
 **Milestone 4 — Planning loop and state management:**
-I will use ChatGPT to generate the planning loop and session-state management logic. I will provide the planning loop, state management, and architecture sections from planning.md. I expect the AI to generate a workflow that conditionally calls tools based on returned results. I will do verify that the workflow stops on errors and correctly stores and retrieves session data between tool calls.
+I used ChatGPT to help design the planning loop logic in agent.py.
+
+I provided:
+
+- the Planning Loop section from planning.md
+- the state management structure
+- the architecture diagram
+
+ChatGPT generated a basic sequential workflow, but I modified it to add explicit conditional branching:
+
+- if search_listings() returns an empty list, the agent stops immediately
+- if results exist, only the top result is selected and passed forward
+- each tool writes to the session dictionary to preserve state across steps
+
+I verified correctness by printing session state after each step and confirming:
+
+- selected_item is identical to the first search result
+- outfit_suggestion is passed directly into create_fit_card
+- the agent does not call later tools when an error occurs
 
 ---
 
